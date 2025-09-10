@@ -1,0 +1,697 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>涂子君老师课表查询系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>body { margin: 0; }</style><style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .logo {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            font-size: 24px;
+        }
+        
+        h1 {
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .teacher-info {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .current-week {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            min-height: 500px;
+        }
+        
+        .calendar-section {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            border-right: 1px solid #eee;
+            background: #f9f9f9;
+        }
+        
+        .timetable-section {
+            flex: 2;
+            min-width: 400px;
+            padding: 20px;
+            background: white;
+        }
+        
+        .calendar {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .calendar-header button {
+            background: #4a6491;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .calendar-header button:hover {
+            background: #3a5481;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+        
+        .calendar-day {
+            text-align: center;
+            padding: 10px 5px;
+            font-weight: bold;
+            background: #e0e8ff;
+            border-radius: 5px;
+        }
+        
+        .calendar-date {
+            text-align: center;
+            padding: 12px 5px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .calendar-date:hover {
+            background: #e0e8ff;
+            transform: scale(1.05);
+        }
+        
+        .calendar-date.selected {
+            background: #4a6491;
+            color: white;
+            box-shadow: 0 0 8px rgba(74, 100, 145, 0.5);
+        }
+        
+        .calendar-date.today {
+            border: 2px solid #4a6491;
+            font-weight: bold;
+        }
+        
+        .calendar-date.has-class::after {
+            content: "";
+            position: absolute;
+            bottom: 3px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            background: #ff6b6b;
+            border-radius: 50%;
+        }
+        
+        .timetable-header {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .selected-date {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .day-navigation button {
+            background: #4a6491;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 5px;
+            transition: background 0.3s;
+        }
+        
+        .day-navigation button:hover {
+            background: #3a5481;
+        }
+        
+        .no-class {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+            font-size: 18px;
+        }
+        
+        .class-card {
+            background: white;
+            border-left: 5px solid #4a6491;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s;
+        }
+        
+        .class-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .class-time {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .class-time i {
+            margin-right: 8px;
+            color: #4a6491;
+        }
+        
+        .class-name {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+        }
+        
+        .class-name i {
+            margin-right: 10px;
+            color: #4a6491;
+        }
+        
+        .class-details {
+            color: #555;
+            font-size: 16px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .class-details i {
+            margin-right: 10px;
+            color: #4a6491;
+            width: 20px;
+        }
+        
+        .actions {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #eee;
+            margin-top: 20px;
+        }
+        
+        .save-btn {
+            background: #4a6491;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+            display: inline-flex;
+            align-items: center;
+            margin: 5px;
+        }
+        
+        .save-btn:hover {
+            background: #3a5481;
+        }
+        
+        .save-btn i {
+            margin-right: 8px;
+        }
+        
+        .instructions {
+            background: #f0f5ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .instructions h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .share-section {
+            text-align: center;
+            padding: 20px;
+            background: #f0f5ff;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .share-section h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .share-options {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .calendar-section {
+                border-right: none;
+                border-bottom: 1px solid #eee;
+            }
+            
+            .calendar-date {
+                padding: 8px 2px;
+            }
+            
+            .share-options {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo"><i class="fas fa-calendar-alt"></i></div>
+            <h1>涂子君老师课表查询系统</h1>
+            <div class="teacher-info">马克思主义学院 | 教工号: 2510249 | 2025-2026学年第1学期</div>
+            <div class="current-week" id="current-week">第 2 教学周</div>
+        </header>
+        
+        <div class="main-content">
+            <div class="calendar-section">
+                <div class="calendar">
+                    <div class="calendar-header">
+                        <button id="prev-month"><i class="fas fa-chevron-left"></i> 上个月</button>
+                        <h2 id="current-month">2025年9月</h2>
+                        <button id="next-month">下个月 <i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="calendar-grid">
+                        <div class="calendar-day">日</div>
+                        <div class="calendar-day">一</div>
+                        <div class="calendar-day">二</div>
+                        <div class="calendar-day">三</div>
+                        <div class="calendar-day">四</div>
+                        <div class="calendar-day">五</div>
+                        <div class="calendar-day">六</div>
+                        <!-- 日期将由JavaScript动态生成 -->
+                    <div class="calendar-date"></div><div class="calendar-date has-class">1</div><div class="calendar-date has-class">2</div><div class="calendar-date has-class">3</div><div class="calendar-date has-class">4</div><div class="calendar-date has-class">5</div><div class="calendar-date">6</div><div class="calendar-date">7</div><div class="calendar-date has-class">8</div><div class="calendar-date has-class">9</div><div class="calendar-date today has-class">10</div><div class="calendar-date has-class">11</div><div class="calendar-date has-class">12</div><div class="calendar-date">13</div><div class="calendar-date">14</div><div class="calendar-date has-class">15</div><div class="calendar-date has-class">16</div><div class="calendar-date has-class">17</div><div class="calendar-date has-class">18</div><div class="calendar-date has-class">19</div><div class="calendar-date">20</div><div class="calendar-date">21</div><div class="calendar-date has-class">22</div><div class="calendar-date has-class">23</div><div class="calendar-date has-class">24</div><div class="calendar-date has-class selected">25</div><div class="calendar-date has-class">26</div><div class="calendar-date">27</div><div class="calendar-date">28</div><div class="calendar-date has-class">29</div><div class="calendar-date has-class">30</div></div>
+                </div>
+                
+                <div class="instructions">
+                    <h3><i class="fas fa-info-circle"></i> 使用说明</h3>
+                    <p>1. 点击日历中的日期查看该日课程</p>
+                    <p>2. 标记红点的日期表示有课程安排</p>
+                    <p>3. 使用左右箭头可切换查看其他月份</p>
+                    <p>4. 页面顶部显示当前是第几教学周</p>
+                </div>
+            </div>
+            
+            <div class="timetable-section">
+                <div class="timetable-header">
+                    <div class="selected-date" id="selected-date">2025年9月13日 星期六</div>
+                    <div class="day-navigation">
+                        <button id="prev-day"><i class="fas fa-chevron-left"></i> 上一天</button>
+                        <button id="next-day">下一天 <i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+                <div id="class-list"><div class="no-class"><i class="fas fa-coffee"></i><br>今天没有课程安排，好好休息吧！</div></div>
+            </div>
+        </div>
+        
+        <div class="share-section">
+            <h3><i class="fas fa-share-alt"></i> 分享与保存</h3>
+            <div class="share-options">
+                <button class="save-btn" id="save-bookmark"><i class="fas fa-bookmark"></i> 保存为书签</button>
+                <button class="save-btn" id="download-html"><i class="fas fa-download"></i> 下载HTML文件</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 校历数据 - 2025-2026学年第一学期
+        const academicCalendar = {
+            startDate: new Date(2025, 8, 1), // 2025年9月1日，月份从0开始，所以8表示9月
+            weeks: [
+                { number: 1, start: new Date(2025, 8, 1), end: new Date(2025, 8, 7) },   // 第1周
+                { number: 2, start: new Date(2025, 8, 8), end: new Date(2025, 8, 14) },  // 第2周
+                { number: 3, start: new Date(2025, 8, 15), end: new Date(2025, 8, 21) }, // 第3周
+                { number: 4, start: new Date(2025, 8, 22), end: new Date(2025, 8, 28) }, // 第4周
+                { number: 5, start: new Date(2025, 8, 29), end: new Date(2025, 9, 5) },  // 第5周
+                { number: 6, start: new Date(2025, 9, 6), end: new Date(2025, 9, 12) },  // 第6周
+                { number: 7, start: new Date(2025, 9, 13), end: new Date(2025, 9, 19) }, // 第7周
+                { number: 8, start: new Date(2025, 9, 20), end: new Date(2025, 9, 26) }, // 第8周
+                { number: 9, start: new Date(2025, 9, 27), end: new Date(2025, 10, 2) }, // 第9周
+                { number: 10, start: new Date(2025, 10, 3), end: new Date(2025, 10, 9) }, // 第10周
+                { number: 11, start: new Date(2025, 10, 10), end: new Date(2025, 10, 16) }, // 第11周
+                { number: 12, start: new Date(2025, 10, 17), end: new Date(2025, 10, 23) }, // 第12周
+                { number: 13, start: new Date(2025, 10, 24), end: new Date(2025, 10, 30) }, // 第13周
+                { number: 14, start: new Date(2025, 11, 1), end: new Date(2025, 11, 7) },  // 第14周
+                { number: 15, start: new Date(2025, 11, 8), end: new Date(2025, 11, 14) }, // 第15周
+                { number: 16, start: new Date(2025, 11, 15), end: new Date(2025, 11, 21) }, // 第16周
+                { number: 17, start: new Date(2025, 11, 22), end: new Date(2025, 11, 28) }, // 第17周
+                { number: 18, start: new Date(2025, 11, 29), end: new Date(2026, 0, 4) }   // 第18周
+            ],
+            holidays: [
+                { name: "国庆节、中秋节", start: new Date(2025, 9, 1), end: new Date(2025, 9, 8) },
+                { name: "元旦", start: new Date(2026, 0, 1), end: new Date(2026, 0, 1) }
+            ]
+        };
+
+        // 从PDF提取的课程数据（更新版本）
+        const courseData = [
+            // 星期一
+            { day: 1, time: "5-6", name: "国家安全教育", weeks: "17周", campus: "凤凰校区", location: "五号楼204", class: "国家安全教育-0007", students: "大数据工程技术B2504;大数据工程技术B2505;智能制造工程技术B2506" },
+            { day: 1, time: "5-6", name: "国家安全教育", weeks: "18周", campus: "凤凰校区", location: "五号楼204", class: "国家安全教育-0007", students: "大数据工程技术B2507;集成电路工程技术B2508;集成电路工程技术B2509" },
+            { day: 1, time: "5-6", name: "国家安全教育", weeks: "19周", campus: "凤凰校区", location: "五号楼204", class: "国家安全教育-0007", students: "大数据工程技术B2501;大数据工程技术B2502;大数据工程技术B2503" },
+            
+            // 星期二
+            { day: 2, time: "5-6", name: "国家安全教育", weeks: "4周,8-18周(双)", campus: "凤凰校区", location: "五号楼206", class: "国家安全教育-0006", students: "医养照护与管理B2501;医养照护与管理B2502" },
+            { day: 2, time: "5-6", name: "国家安全教育", weeks: "5-17周(单)", campus: "凤凰校区", location: "五号楼206", class: "国家安全教育-0005", students: "智能制造工程技术B2501;智能制造工程技术B2502;智能制造工程技术B2503" },
+            
+            // 星期三
+            { day: 3, time: "5-6", name: "国家安全教育", weeks: "4周,8-18周(双)", campus: "凤凰校区", location: "一号楼109", class: "国家安全教育-0010", students: "护理B2504;中文国际教育B2503" },
+            { day: 3, time: "5-6", name: "国家安全教育", weeks: "7-17周(单)", campus: "凤凰校区", location: "一号楼109", class: "国家安全教育-0012", students: "云计算技术应用2501;云计算技术应用2502" },
+            
+            // 星期四
+            { day: 4, time: "5-6", name: "国家安全教育", weeks: "4-6周(双),10-16周(双)", campus: "凤凰校区", location: "五号楼302", class: "国家安全教育-0009", students: "应用英语B2501;应用英语B2502;应用英语B2503" },
+            { day: 4, time: "5-6", name: "国家安全教育", weeks: "7-17周(单)", campus: "凤凰校区", location: "五号楼302", class: "国家安全教育-0002", students: "集成电路工程技术B2501;集成电路工程技术B2502;集成电路工程技术B2503" },
+            
+            // 星期五
+            { day: 5, time: "7-8", name: "国家安全教育", weeks: "4-6周(双),10-16周(双)", campus: "凤凰校区", location: "五号楼204", class: "国家安全教育-0007", students: "大数据工程技术B2504;大数据工程技术B2505;智能制造工程技术B2504" },
+            { day: 5, time: "7-8", name: "国家安全教育", weeks: "7-17周(单)", campus: "凤凰校区", location: "五号楼204", class: "国家安全教育-0001", students: "大数据工程技术B2501;大数据工程技术B2502;大数据工程技术B2503" }
+        ];
+
+        // 当前显示的日期
+        let currentDate = new Date();
+        let selectedDate = null;
+
+        // 计算当前是第几周
+        function calculateCurrentWeek() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // 检查是否在学期内
+            if (today < academicCalendar.weeks[0].start) {
+                return "学前周";
+            }
+            
+            if (today > academicCalendar.weeks[academicCalendar.weeks.length - 1].end) {
+                return "寒假";
+            }
+            
+            // 检查是否在假期中
+            for (const holiday of academicCalendar.holidays) {
+                if (today >= holiday.start && today <= holiday.end) {
+                    return `假期 (${holiday.name})`;
+                }
+            }
+            
+            // 查找当前周
+            for (const week of academicCalendar.weeks) {
+                if (today >= week.start && today <= week.end) {
+                    return `第 ${week.number} 教学周`;
+                }
+            }
+            
+            return "非教学周";
+        }
+
+        // 初始化日历
+        function initCalendar() {
+            updateCalendar();
+            
+            // 更新当前周显示
+            document.getElementById('current-week').textContent = calculateCurrentWeek();
+            
+            // 添加上下月按钮事件
+            document.getElementById('prev-month').addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                updateCalendar();
+            });
+            
+            document.getElementById('next-month').addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                updateCalendar();
+            });
+            
+            // 添加上下天按钮事件
+            document.getElementById('prev-day').addEventListener('click', () => {
+                if (selectedDate) {
+                    selectedDate.setDate(selectedDate.getDate() - 1);
+                    selectDate(selectedDate);
+                } else {
+                    const today = new Date();
+                    today.setDate(today.getDate() - 1);
+                    selectDate(today);
+                }
+            });
+            
+            document.getElementById('next-day').addEventListener('click', () => {
+                if (selectedDate) {
+                    selectedDate.setDate(selectedDate.getDate() + 1);
+                    selectDate(selectedDate);
+                } else {
+                    const today = new Date();
+                    today.setDate(today.getDate() + 1);
+                    selectDate(today);
+                }
+            });
+            
+            // 添加书签按钮事件
+            document.getElementById('save-bookmark').addEventListener('click', () => {
+                alert('请使用浏览器的"添加到收藏夹"功能保存此页面。\n快捷键: Ctrl+D (Windows) 或 Cmd+D (Mac)');
+            });
+            
+            // 添加下载HTML按钮事件
+            document.getElementById('download-html').addEventListener('click', () => {
+                // 创建一个包含完整HTML内容的Blob对象
+                const htmlContent = `<!DOCTYPE html>${document.documentElement.outerHTML}`;
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                
+                // 创建下载链接
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = '涂子君老师课表查询系统.html';
+                a.click();
+                
+                // 清理URL对象
+                URL.revokeObjectURL(a.href);
+            });
+        }
+
+        // 更新日历显示
+        function updateCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            // 更新月份标题
+            document.getElementById('current-month').textContent = `${year}年${month + 1}月`;
+            
+            // 获取当月第一天和最后一天
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            
+            // 计算第一天是星期几（0是星期日）
+            const firstDayOfWeek = firstDay.getDay();
+            
+            // 计算当月天数
+            const daysInMonth = lastDay.getDate();
+            
+            // 获取日历网格容器
+            const calendarGrid = document.querySelector('.calendar-grid');
+            
+            // 清空除了星期标题之外的所有日期
+            while (calendarGrid.children.length > 7) {
+                calendarGrid.removeChild(calendarGrid.lastChild);
+            }
+            
+            // 添加空白日期（上月遗留）
+            for (let i = 0; i < firstDayOfWeek; i++) {
+                const emptyDate = document.createElement('div');
+                emptyDate.className = 'calendar-date';
+                calendarGrid.appendChild(emptyDate);
+            }
+            
+            // 添加当月日期
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            for (let i = 1; i <= daysInMonth; i++) {
+                const date = new Date(year, month, i);
+                const dayOfWeek = date.getDay(); // 0 = 周日, 1 = 周一, ..., 6 = 周六
+                
+                const dateElement = document.createElement('div');
+                dateElement.className = 'calendar-date';
+                dateElement.textContent = i;
+                
+                // 标记今天
+                if (date.getTime() === today.getTime()) {
+                    dateElement.classList.add('today');
+                }
+                
+                // 标记有课的日期（周一至周五）
+                if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+                    dateElement.classList.add('has-class');
+                }
+                
+                // 添加点击事件
+                dateElement.addEventListener('click', () => selectDate(date));
+                
+                calendarGrid.appendChild(dateElement);
+            }
+            
+            // 如果已经选择了日期，且日期在当前月份，则高亮显示
+            if (selectedDate && selectedDate.getMonth() === month && selectedDate.getFullYear() === year) {
+                highlightSelectedDate();
+            }
+        }
+
+        // 选择日期
+        function selectDate(date) {
+            selectedDate = date;
+            highlightSelectedDate();
+            showTimetableForDate(date);
+        }
+
+        // 高亮选中的日期
+        function highlightSelectedDate() {
+            // 移除之前的选择
+            document.querySelectorAll('.calendar-date.selected').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            // 高亮新选择的日期
+            if (selectedDate && selectedDate.getMonth() === currentDate.getMonth() && selectedDate.getFullYear() === currentDate.getFullYear()) {
+                const dates = document.querySelectorAll('.calendar-date');
+                dates[selectedDate.getDate() + 6 + selectedDate.getDay()].classList.add('selected');
+            }
+        }
+
+        // 显示选定日期的课表
+        function showTimetableForDate(date) {
+            const dayOfWeek = date.getDay(); // 0 = 周日, 1 = 周一, ..., 6 = 周六
+            const dayNames = ["日", "一", "二", "三", "四", "五", "六"];
+            
+            // 更新选中的日期显示
+            document.getElementById('selected-date').textContent = 
+                `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 星期${dayNames[dayOfWeek]}`;
+            
+            // 获取课程列表容器
+            const classList = document.getElementById('class-list');
+            classList.innerHTML = '';
+            
+            // 如果是周末，显示无课
+            if (dayOfWeek === 0 || dayOfWeek === 6) {
+                classList.innerHTML = '<div class="no-class"><i class="fas fa-coffee"></i><br>今天没有课程安排，好好休息吧！</div>';
+                return;
+            }
+            
+            // 获取当天的课程
+            const dayCourses = courseData.filter(course => course.day === dayOfWeek);
+            
+            // 如果没有课程
+            if (dayCourses.length === 0) {
+                classList.innerHTML = '<div class="no-class"><i class="fas fa-book"></i><br>今天没有课程安排</div>';
+                return;
+            }
+            
+            // 显示课程
+            dayCourses.forEach(course => {
+                const classCard = document.createElement('div');
+                classCard.className = 'class-card';
+                
+                classCard.innerHTML = `
+                    <div class="class-time"><i class="fas fa-clock"></i> 第${course.time}节</div>
+                    <div class="class-name"><i class="fas fa-book"></i> ${course.name}</div>
+                    <div class="class-details"><i class="fas fa-calendar-week"></i> <strong>周数:</strong> ${course.weeks}</div>
+                    <div class="class-details"><i class="fas fa-map-marker-alt"></i> <strong>校区:</strong> ${course.campus}</div>
+                    <div class="class-details"><i class="fas fa-location-arrow"></i> <strong>地点:</strong> ${course.location}</div>
+                    <div class="class-details"><i class="fas fa-users"></i> <strong>教学班:</strong> ${course.class}</div>
+                    <div class="class-details"><i class="fas fa-graduation-cap"></i> <strong>教学班组成:</strong> ${course.students}</div>
+                `;
+                
+                classList.appendChild(classCard);
+            });
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            initCalendar();
+            // 默认选择今天
+            selectDate(new Date());
+        });
+    </script>
+
+</body></html>
